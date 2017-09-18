@@ -16,6 +16,11 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+/**
+ * 生成验证码以及生成对应的验证图片
+ * @author asus
+ *
+ */
 public class VerifyCodeUtils {
     
     //使用Algerian字体，系统里没有的话需要安装字体，字体只显示大写。
@@ -46,7 +51,7 @@ public class VerifyCodeUtils {
         Random rand = new Random(System.currentTimeMillis());
         StringBuilder verifyCode = new StringBuilder(verifySize);
         for(int i = 0; i < verifySize; i++) {
-            verifyCode.append(sources).charAt(rand.nextInt(codesLen - 1));
+            verifyCode.append(sources.charAt(rand.nextInt(codesLen - 1)));
         }
         return verifyCode.toString();
     }
@@ -60,7 +65,22 @@ public class VerifyCodeUtils {
      * @return
      * @throws IOException 
      */
-    public static String outputVerifyImage(int w, int h, OutputStream os, int verifySize) throws IOException {
+    public static String outputVerifyImage(int w, int h, File outputFile, int verifySize) throws IOException {
+        String verifyCode = generateVerifyCode(verifySize);
+        outputImage(w, h, outputFile, verifyCode);
+        return verifyCode;
+    }
+    
+    /** 
+     * 输出随机验证码图片流,并返回验证码值 
+     * @param w 
+     * @param h 
+     * @param os 
+     * @param verifySize 
+     * @return 
+     * @throws IOException 
+     */  
+    public static String outputVerifyImage(int w, int h, OutputStream os , int verifySize) throws IOException {
         String verifyCode = generateVerifyCode(verifySize);
         outputImage(w, h, os, verifyCode);
         return verifyCode;
@@ -162,7 +182,7 @@ public class VerifyCodeUtils {
         for (int i = 0; i < verifySize; i++) {
             AffineTransform affine = new AffineTransform();
             affine.setToRotation(Math.PI / 4 * rand.nextDouble() * 
-                    (rand.nextBoolean() ? 1 : -1), (w / verifySize) * i + fontSize / 2);
+                    (rand.nextBoolean() ? 1 : -1), (w / verifySize) * i + fontSize / 2, h/2);
             g2.setTransform(affine);
             g2.drawChars(chars, i, 1, ((w-10) / verifySize) * i + 5,
                     h/2 + fontSize/2 - 10);
@@ -206,7 +226,7 @@ public class VerifyCodeUtils {
         shearY(g, w1, h1, color);
     }
 
-    private static void shearY(Graphics g, int w1, int h1, Color color) {
+    private static void shearX(Graphics g, int w1, int h1, Color color) {
         
         int period = random.nextInt(2);
         
@@ -228,7 +248,7 @@ public class VerifyCodeUtils {
         }
     }
 
-    private static void shearX(Graphics g, int w1, int h1, Color color) {
+    private static void shearY(Graphics g, int w1, int h1, Color color) {
         
         int period = random.nextInt(40) + 10; //50
         
