@@ -44,6 +44,7 @@ public class VerifyCodeUtils {
      * @return
      */
     private static String generateVerifyCode(int verifySize, String sources) {
+        //没有标准源数据，使用默认数据
         if(sources == null || sources.length() == 0){
             sources = VERIFY_CODES;
         }
@@ -128,23 +129,23 @@ public class VerifyCodeUtils {
         Random rand = new Random();
         Graphics2D g2 = image.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Color[] colors = new Color[5];
-        Color[] colorSpaces = new Color[] { Color.WHITE, Color.CYAN,
-                Color.GRAY, Color.LIGHT_GRAY, Color.MAGENTA, Color.ORANGE,
-                Color.PINK, Color.YELLOW };
-        float[] fractions = new float[colors.length];
-        for (int i = 0; i < colors.length; i++) {
-            colors[i] = colorSpaces[rand.nextInt(colorSpaces.length)];
-            fractions[i] = rand.nextFloat();
-        }
-        Arrays.sort(fractions);
+//        Color[] colors = new Color[5];
+//        Color[] colorSpaces = new Color[] { Color.WHITE, Color.CYAN,
+//                Color.GRAY, Color.LIGHT_GRAY, Color.MAGENTA, Color.ORANGE,
+//                Color.PINK, Color.YELLOW };
+//        float[] fractions = new float[5];
+//        for (int i = 0; i < 5; i++) {
+//            colors[i] = colorSpaces[rand.nextInt(colorSpaces.length)];
+//            fractions[i] = rand.nextFloat();
+//        }
+//        Arrays.sort(fractions);
         
-        // 设置边框色
+        // 设置边框色，构造一个灰色的色块，然后通过覆盖产生边框效果
         g2.setColor(Color.GRAY);
         g2.fillRect(0, 0, w, h);
         
         Color c = getRandColor(200, 250);
-        // 设置背景色 
+        // 设置背景色  ，覆盖在边框色快上
         g2.setColor(c);
         g2.fillRect(1, 2, w, h - 4);
         
