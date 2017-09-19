@@ -1,6 +1,7 @@
 package com.sqb.mail;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
@@ -34,15 +35,17 @@ public class Sender implements Runnable {
             msg.setSubject("JavaMail hello world example");  
             msg.setSentDate(new Date());  
             String filename = "C:\\Users\\asus\\Desktop\\a.html";//html文件地址  
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));// 解决读取中文乱码  
             String line = null;  
-            StringBuffer sb = new StringBuffer();  
+            StringBuffer sb = new StringBuffer(); 
+            if (new File(filename).exists()) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));// 解决读取中文乱码  
             while ((line = br.readLine()) != null) {  
                 sb.append(line);//拼接到stringBuffer  
                 sb.append("\n");//按理说可以不用换行都可以解析html  
             }  
-//            sb.append("xxx");
             br.close();  
+            }
+//            sb.append("xxx");
             BodyPart bodyPart = new MimeBodyPart();//BodyPart是邮件内容的承载体，可以是文件，图片，附件等...  
             bodyPart.setContent(sb.toString(), "text/html;charset=UTF-8");//设置页面的编码值  
             Multipart multiPart = new MimeMultipart();//Multipart又是BodyPart的承载体，一个multiPart可以包含多个BodyPart  
