@@ -29,11 +29,11 @@ public class Sender implements Runnable {
         session = Session.getInstance(props, null);  
         msg = new MimeMessage(session);  
         try {  
-            msg.setFrom("abc@163.com");  
+            msg.setFrom("abc@126.com");  
             msg.setRecipients(Message.RecipientType.TO, "abc@qq.com");//收件地址  
             msg.setSubject("JavaMail hello world example");  
             msg.setSentDate(new Date());  
-            String filename = "C:\\Users\\xxx\\Desktop\\a.html";//html文件地址  
+            String filename = "C:\\Users\\asus\\Desktop\\a.html";//html文件地址  
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));// 解决读取中文乱码  
             String line = null;  
             StringBuffer sb = new StringBuffer();  
@@ -41,6 +41,7 @@ public class Sender implements Runnable {
                 sb.append(line);//拼接到stringBuffer  
                 sb.append("\n");//按理说可以不用换行都可以解析html  
             }  
+//            sb.append("xxx");
             br.close();  
             BodyPart bodyPart = new MimeBodyPart();//BodyPart是邮件内容的承载体，可以是文件，图片，附件等...  
             bodyPart.setContent(sb.toString(), "text/html;charset=UTF-8");//设置页面的编码值  
