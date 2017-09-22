@@ -131,7 +131,7 @@ public class ExcelUtil {
             try {
                 getMethod = object.getClass().getMethod(methodName);
                 Object obj = getMethod.invoke(object);
-                if (null != obj || "".equals(obj)) {
+                if (null != obj && !"".equals(obj)) {
                     flag = true;
                     break;
                 }
