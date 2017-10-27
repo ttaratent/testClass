@@ -1,10 +1,40 @@
 package com.sqb.array;
 
+import java.util.Arrays;
+
 public class Test {
     public static void main(String[] args) {
 //        test1();
 //        test2();
-        test3();
+//        test3();
+        test4();
+    }
+
+    private static void test4() {
+        Person person_01 = new Person("chenssy_01");
+
+        Person[] persons1 = new Person[] { person_01 };
+        Person[] persons2 = Arrays.copyOf(persons1, persons1.length);
+
+        System.out.println("数组persons1:");
+        display(persons1);
+        System.out.println("---------------------");
+        System.out.println("数组persons2:");
+        display(persons2);
+        // 改变其值
+        persons2[0].setName("chessy_02");
+        System.out.println("------------改变其值后------------");
+        System.out.println("数组persons1:");
+        display(persons1);
+        System.out.println("---------------------");
+        System.out.println("数组persons2:");
+        display(persons2);
+    }
+    
+    public static void display(Person[] persons){
+        for(Person person : persons){
+            System.out.println(person.toString());
+        }
     }
 
     private static void test3() {
