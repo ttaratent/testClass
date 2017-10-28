@@ -1,1 +1,2 @@
 Array.copyOf是浅拷贝
+Array的对象类名是在JVM中进行初始化的
