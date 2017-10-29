@@ -1,13 +1,24 @@
 package com.sqb.array;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Test {
     public static void main(String[] args) {
 //        test1();
 //        test2();
 //        test3();
-        test4();
+//        test4();
+        test5();
+    }
+
+    /**
+     * asList方法返回的ArrayList并不是我们平时实用的ArrayList而是Arrays的内部类，其本身没有add之类的方法
+     */
+    private static void test5() {
+        int[] datas = new int[]{1,2,3,4,5};
+        List list = Arrays.asList(datas);
+        System.out.println(list.size());
     }
 
     private static void test4() {
