@@ -1,0 +1,14 @@
+Timer
+
+1、Timer管理时间延迟缺陷
+
+前面Timer在执行定时任务时只会创建一个线程任务，如果存在多个线程，
+若其中某个线程因为某种原因而导致线程任务执行时间过长，
+超过了两个任务的间隔时间，会发生一些缺陷
+
+
+2、Timer抛出异常缺陷
+
+如果TimerTask抛出RuntimeException，Timer会终止所有任务的运行
+
+可以通过使用ScheduledExecutorService替代Timer
