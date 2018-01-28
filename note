@@ -1,0 +1,9 @@
+locale -a | grep zh
+
+centos 7之前
+/etc/sysconfig/i18n
+
+centos 7 
+/etc/loacle.conf
+
+文字编码暂未解决...
