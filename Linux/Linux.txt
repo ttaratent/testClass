@@ -1,0 +1,7 @@
+命令：
+cd
+
+ls -al 可以查看相关文件的权限信息
+chmod 权限命令,调整文件拥有者、文件group以及others的读写以及执行权限
+chgrp 设置group
+chown 设置拥有者
