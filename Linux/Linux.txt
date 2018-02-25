@@ -4,6 +4,11 @@ cd
 ls -l 可以查看相关文件的权限信息
 chmod 权限命令,调整文件拥有者、文件group以及others的读写以及执行权限
 chmod 修改权限的方法有两种：分别是符号法与数字法，数字法中r、w、x分别为4、2、1；
+-rwxr-x-r-- chmod 754     chmod u=rwx g=rx o=r
+drwxr--r-- d表示该为directory
+lrwxr--r-- l表示该为link
+
+一个文件以.开头表示该文件为隐藏文件
 
 对文件来说，权限的性能为：
 r：可读取此一文件的实际内容，如读取文件的文字内容等；
@@ -29,3 +34,192 @@ FHS所定义的三层主目录为：/、/var、/usr三层而已
 
 chgrp 设置group
 chown 设置拥有者
+
+
+文件处理
+ls -l 以竖向显示
+ls -al 以竖向显示所有文件
+ls -alF --full-time 将文件类型显示出来  并显示完整时间
+ls -alF --color=never 显示不带颜色
+ls -r 显示子目录以及其下的所有文件
+
+cp 除了可以复制外，还可以创建链接文件，比对两个文件的新旧而予以更新，以及复制整个目录等等的功能
+mv 移动目录与文件 也可以用来作更名 （其中存在另一个命令为rename 用于给多个文件进行重命名操作）
+rm 移除
+
+basename   用于取得文件名
+dirname    用于取得目录名
+
+cat  由第一行开始显示文件内容
+tac  从最后一行开始显示，可以看出tac是cat倒着写
+nl   显示的时候，顺便输出行号
+more 一页一页的显示内容
+less与more类似，但是比more更好的是，他可以往前翻页
+head 只看头几行
+tail 只看尾巴几行
+od   以二进制的方式读取文件内容
+
+date ; ls -l /etc/man_db.conf ; ls -l --time = atime /etc/man_db.conf ; \&gt ; lt -l --time=ctime /etc/man_db.conf
+
+mtime  修改时间
+ctime  status 状态、权限、属性变更时间
+atime  访问时间
+
+touch 可以创建空文件  /  修改 atime mtime
+
+文件隐藏属性    chattr 设置    lsattr 查看
+
+文件默认权限   umask     
+umask 0022  ->  共4组，第一位为特殊权限 且只记录去除的权限
+
+umask  -S u=rwx g=rx o=rx
+设置默认权限   umask 02 =》  rw_rw_r__
+
+使用者创建文件 ： (_rw_rw_rw_)
+目录：(drwxdrwxdrwx)
+
+root  默认umask 022
+一般用户  umask 002
+umask  设置可以参考/etc/.bashrc   ~/.bashrc
+
+chattr 只能在Ext2/Ext3/Ext4 的Linux传统文件系统上完整生效
+P322
+
+有这些选项[+-=][ASacdisu]
+xfs系统上有这些选项[Aadis]
+
+lsattr [-adR] 文件/目录
+a 将隐藏文件属性也秀出来
+d 如果接的是目录
+
+/etc/shadow  用于存放所有用户的密码文件
+
+特殊权限
+SUID    SGID   SBIT
+SUID： set UID    user id
+1、仅对二进制程序有效
+2、执行者对于该程序需要具有x的可执行权限
+3、本权限仅在执行该程序的过程中有效（run-time）
+4、执行者将具有该程序的拥有者（owner）权限
+-rws_ _ _ _ _ _
+
+SGID：  set GID   group id  _rwx__s__x
+可作用于文件 或者 目录 上
+1、文件
+	对二进制程序有用
+	程序执行者对于该程序来说，需具备x权限
+	执行者在执行的过程中将会获得该程序群组的支持
+	
+2、目录
+	使用者对于此目录具有r与x的权限时，该使用者能够进入此目录
+	使用者在此目录下的有效群组（effective group）将会变成该目录的群组
+	用途：若使用者在此目录下具有w的权限（可以新建文件）则使用者所创建的新文件，该新文件的群组与此目录的群组相同。
+
+	
+SBIT：   sticky Bit   目前只针对目录
+可以参考/tmp
+当使用者对于此目录具有w,x权限时
+当使用者在该目录下创建文件或目录时，仅有自己与root才有权力删除该文件
+
+设置权限时      特殊权限   
+4：SUID
+2：SGID
+1：SBIT
+
+chmod 4777 filename      - >    _rwsrwxrwx
+
+当出现S、T 代表具有空的SUID/SGID/SBIT权限   例如  _rwSrwSrwT    
+
+chmod u=rwxs, go=x test
+chmod g+s,o+t test
+
+观察文件类型： file
+可以查看文件的基本数据类型，有无使用动态函数库
+
+which  （寻找可执行文件）
+which [-a] command
+默认找PATH内所规范的目录
+bash内置指令：可以用type
+
+文件文件名的搜寻：
+whereis （由一些特定的目录中寻找文件文件名）
+主要针对  /bin/sbin  下面的可执行文件
+          /usr/share/man 下面的man page文件
+		  以及几个比较特定的目录
+whereis -l 可以确认查了多少目录
+
+locate 可搜寻部分文件名来检索
+locate 寻找的数据是由“已创建的数据库文件/var/lib/mlocate”提供
+
+updatedb： 更新locate的数据库
+根据/etc/updatedb.conf 设置搜寻系统硬盘内的文件名，并更新/var/lib/mlocate
+
+locate：依据/var/lib/mlocate内的数据库记载，找出使用者输入的关键字文件名
+
+find [PATH] [option][action]
+					<-4->
+					  -4 ------------------>
+<------------------ +4
+<___|___|____|_____|_____|_____|_____|_____|
+	7	6	 5	   4	 3	   2	 1     |
+1）与时间相关：
+	-mtime n
+	-mtime +n
+	-mtime -n
+	-never file 具体文件名
+	
+2）与使用者或群组名称有关的参数
+	-uid n             /etc/passwd
+	-gid n             /etc/group
+	-user name
+	-group name
+	-nouser
+	-nogroup
+
+3）与文件权限及名称有关的参数
+	-name
+	-size [+-]SIZE
+	-type TYPE 一段文件（f），设备文件(b,c)，目录（d）  链接（l） FIFO（p）socket（s）等 
+	-perm mode 文件权限为mode的
+	-perm mode 必须全部囊括mode权限
+	-perm /mode 包含任一mode权限
+
+4）额外可进行的动作
+	-exec command：command为其他指令，-exec后面可接额外的指令来处理搜寻到的结果
+	-print 将结果打印到屏幕上  默认动作
+					  <开始结束符>
+find / -perm /7000 -exec ls -l {} \;
+{}只带通过find查找到的内容
+
+
+文件系统
+*superblock：记录此filesystem的整体信息，包括inode/block的宗量，使用量，剩余量，以及文件系统的格式与相关信息等
+*inode 记录文件的属性，一个文件占用一个inode，同时记录此文件的数据所在的block号码
+*block 实际记录文件的内容，若文件太小时，会占用多个block
+
+Ext2文件系统  属于  索引式文件系统  inode  / block
+FAT     链式存储   下一个block是记录在上一个block中
+
+Ext2  格式化时将分为多个区块群组
+		每个区块群组都有独立的inode/block/superblock：记录此filesystem的整体信息，包括inode/block的宗量，使用量，剩余量，以及文件系统的格式与相关信息等
+
+|boot 	 |Block |Block |Block |Block
+|sector  |Group1|Group2|Group3|Group...
+			
+			|
+			v
+		|Super|档案系统描述|区块对应表|inode |inode|Data
+		|Block|			   |		  |对应表|Table|Block
+		
+*data block （数据区块）
+Block 大小     	|	1KB		|  2KB		|	4KB
+最大单一文件限制|16GB		|256GB		|2TB
+最大文件流总容量|2TB		|8TB		|16TB
+
+*原则上，block大小与数量在格式化完就不能够再改变了（除非重新格式化）
+*每个block内最多只能够数量一个文件的数据
+*承上，如果文件大于block的大小，则一个文件会占用多个block数量
+*承上，若文件小于block，则该block的剩余容量就不能够再被使用了（磁盘空间会浪费）
+
+
+
