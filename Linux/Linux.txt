@@ -391,3 +391,160 @@ Block 大小     	|	1KB		|  2KB		|	4KB
 
 
 
+
+
+*Superblock 超级区块
+是记录整个filesystem相关信息的地方，没有Superblock，就没有这个filesystem。
+
+主要信息有
+*block与indoe总量
+*未使用与已使用的inode/block数量
+*block与inode的大小（block为1,2,4K，inode为128Bytes或256Bytes）
+*filesystem的挂载时间，最近一次写入数据时间，最近一次检验磁盘（fsck）的时间等文件系统的相关信息。
+*一个vaild bit数值，若此文件系统已被挂载，则valid bit为0，若未被挂载，则valid bit为1
+
+一般Superblock  大小为1024Bytes
+一个文件系统应该仅有一个Superblock，所以除了第一个Superblock外的Superblock主要用于备份。
+
+*Filesystem Description（文件系统描述说明）
+描述每个block group开始与结束的block号码，以及说明（superblock，bitmap，inodemap，data block）
+分别介于哪一个block号码之间。
+
+*block bitmap  （区块对照表）
+记录使用或未使用  block  
+新增，删除时检索  对应文件 block
+
+*inode   bitmap  （inode 对照表）
+记录使用或未使用inode
+
+*dumpe2fs   查询Ext家族superblock信息的指令
+blkid   可以su出目前系统有被格式化的设备
+
+P352
+
+目录树：  目录    记录文件名
+Inode  档名
+number
+53735697    anaconde.cfg
+53745858    initial-setup-ks.cfg
+
+ls  -i  观察文件所占用inode号码
+
+
+*文件
+当我们创建一个文件时：  ext2会分配一个inode与相对于该文件大小的block数量给该文件
+例如：假设一个block为4KBytes，而要创建一个1000KBytes文件，
+那么linux将分配一个inode与25个block来存储文件，但同时由于inode仅有12个直接指向，
+因此还需要多一个block来作为区块号码记录。
+
+*目录树读取
+当文件太过分散（block）  可以将整个filesystem内的数据全部复制出来，奖盖filesystem重新格式化，在将数据给他复制回去。
+
+partition  规划：
+
+
+新建文件/目录
+1、先确定对目录有无w  x 权限
+2、根据inode bitmap  =》未使用inode，并将文件/属性写入
+3、根据block bitmap  =》未使用block，并将实际的数据写入block且inode的block指向数据
+4、将刚刚写入的inode与block数据同步更新inode bitmap与block bitmap，并更新superblock内容
+
+数据存放区域：  inode table   data block
+
+metadata（中介数据） superblock、block bitmap、inode bitmap
+
+数据不一致状态， 由于突发原因等导致部分未同步可通过e2fsck进行强制数据一致性检查
+日志式文件系统 （journaling filesystem）
+
+
+Linux 文件系统的运行
+非同步处理
+当系统载入一个文件到内存后，如果该文件没有被变更过则在内存区段的文件数据会被设置为干净（clean）。
+但如果内存中的文件数据被更改过了，此时该内存中的数据会被设置为脏的（Dirty）。此时，所有动作
+都还在内存中执行，并未写入磁盘，系统不定时将Dirty数据写回磁盘，以保持一致，也可手动同步 sync
+
+*系统会将常用的文件数据放置到内存的缓冲区以加速文件系统的读/写
+*承上，因此Linux的实体内存最后都会被用光！这是正常情况！可加速系统性能
+*可以手动使用sync来强迫内存中设置为Dirty的文件回写到磁盘中
+*若正常关机时，关机指令会主动调用sync来将内存的数据会写磁盘内
+*但若不正常关机（如跳电，死机或其他不明原因），由于数据尚未回写到磁盘内，因此重新开机后可能
+会花很多时间在进行磁盘检验，设置可能导致文件系统的损毁（非磁盘损毁）
+
+ls -d  查看目录
+
+
+Linux 文件系统  与 VFS
+*传统文件系统 ： ex2/minux/MS-DOS/FAT（用vfat模块）/iso9660（光盘）等等...
+*日志式文件系统：  ex3/ex4/ReiserFS/Window/NTFS/IBM JFS/SGI's XFS/ZFS
+*网络文件系统：  NFS/SMBFS
+
+ls  -l /lib/modules/中  （uname -r）  /kernel/fs
+查看Linux  支持的文件系统有哪些
+
+系统目前已载入到内存中支持的文件系统
+cat /proc/filesystems
+
+*Linux  VFS  （Virtual Filesystem Switch）
+读取FileSystem
+
+XFS 文件系统简介：
+Ext家族   预先分配inode/block/metadata等数据随着容量增大，格式化过慢
+
+xfs文件系统在数据的分布上，主要规划为三个部分，一个数据区（data section）、
+一个文件系统活动的登录区（log section）以及一个实时运行区（realtime section）
+
+*数据区（data section）
+基本上，数据区就跟我们之前谈到的ext家族一样，包括inode/data block/superblock等数据，都放置在这个区块。
+这个数据区域ext家族的block group类似，也是分为多个储存区群组（allocation groups）来分别放置文件
+系统所需要的数据。每个储存区群组都包含了
+1）整个文件系统的superblock
+2）剩余空间的管理机制
+3）inode的分配与追踪
+动态生成block  inode
+
+*文件系统活动登录区（log section）
+主要被用来记录文件系统的变化，其实有点像是日志区。
+可指定
+
+*实时运行区（realtime section）
+当有文件要被创建时，xfs会在这个区段里面找一个到数个的extent区块，将文件放置在这个区块内，等到分配完毕后，
+再写入到data section 的inode 与 block 去
+这个extent 区块的大小得要在格式化的时候就先制定，最小值是4K最大可到1G。一般非磁盘阵列的磁盘默认为64K容量，
+而具有类似磁盘阵列的stripe情况下，则建议extent设置为stripe一样的较佳，这个extent最好不要乱动，因为可能会
+影响到实体磁盘的性能
+
+*xfs文件系统的描述数据观察
+xfs_info 挂载点&#124;设备文件名
+df -T   /boot
+xfs_info /dev/vda2
+
+文件系统的简单操作
+df ： 列出文件系统的整体磁盘使用量
+du ： 评估文件系统的磁盘使用量（常用在推估目录所占容量）
+
+df [-ahikHTm] [目录或文件名]
+a  列出所有的文件系统，包括系统特有的/proc等文件系统
+k  以KBytes容量显示各文件系统
+m  以MBytes容量显示各文件系统
+h  以人们较易阅读的GBytes、Mbytes、KBytes等格式自行显示
+H  以M=1000K取代M=1024K的进位方式
+T  连同该partition的filesystem名称（例如xfs）也列出
+i  不用磁盘容量，而以inode的数量来显示
+
+*FileSystem  代表该文件系统是在哪个partition，所以列出设备名称
+*1K-blocks  说明下面的数字单位1KB  可用-h或者-m来改变容量
+*Used    用掉的磁盘空间
+*Available    剩下的磁盘空间大小
+*Use%    磁盘利用率   （特别/var/spoo/mail 这个放置邮件的磁盘）
+*Mounted on   磁盘挂载的目录所在  （挂载点）
+
+/proc   是内存中的特殊目录   哦用于Linux系统所需载入的系统数据
+/dev/shm  目录，其实是利用内存虚拟出来的磁盘空间，在下次开机时就消失了。
+
+du ： [-ahskm]
+-a  列出所有与目录容量，因为默认仅统计目录下面的文件而已
+-h  以人们较易读的容量格式（G/M）显示
+-s  列出总量而已，而不列出每个个别的目录
+-S  不包括子目录下的总计，与-s有点差别
+-k  以KBytes列出容量显示
+-m  以MBytes列出容量显示
