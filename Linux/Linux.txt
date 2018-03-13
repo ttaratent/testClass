@@ -695,3 +695,189 @@ mkfs.ext4 [-b size] [-L label]设备名称
 
 *其他文件系统  mkfs
 mkfs [tab][tab] 查可支持哪些系统
+
+文件系统检验
+*xfs_repair 处理 XFS 文件系统
+当有xfs文件系统错乱才需要使用这个指令。
+xfs_repair [-fnd] 设备名称
+-f 后面的设备其实是个文件而不是实体设备
+-n 单纯检查并不修改文件系统的任何数据（检查而已）
+-d 通常用在单人维护模式下面，针对根目录（/）进行检查与修复的动作   很危险，不要随便使用
+
+xfs_repair 可以检查/修复文件系统，不过，因为修复文件系统是个很庞大的任务！因此，修复时该文件系统不能被挂载。
+而对于根目录来说，可以通过-d这个选项，使系统强制检验该设备，检验完毕后就会自动重新开机。
+
+*fsck.ext4处理EXT4文件系统
+fsck是个综合指令，如果是针对ext4的话，建议直接使用fsck.ext4来检测比较妥当，那fsck.ext4的选项
+有下面几个常见的项目
+fsck.ext4 [-pf] [-b superblock] 设备名称
+-p 当文件系统在修复时，若有需要回复 y 的动作时，自动回复 y 来继续进行修复动作
+-f 强制检查！一般来说，如果fsck 没有发现任何unclean的旗标，不会主动进入细部检查的，
+如果想要强制fsck进入细部检查，就得加上-f 旗标
+-D 针对文件系统下的目录进行最优化配置
+-b 后面接superblock的位置  一般来说这个选项用不到，但如果你的superblock因故损毁时，通过这个参数
+即可利用文件系统内备份的superblock来尝试救援。一般来说，superblock备份在：1K block 放在8193,2K block放在16384,4K block放在32768
+
+文件系统挂载与卸载
+*单一文件系统不应该被重复挂载在不同的挂载点（目录）中
+*单一目录不应该重复挂载多个文件系统
+*要作为挂载点的目录，理论上应该都是空目录才是
+
+mount -a 
+mount [-l]
+mount [-t 文件系统] LABEL = ''  挂载点
+mount [-t 文件系统] UUID = '' 挂载点   （推荐）
+mount [-t 文件系统] 设备文件名 挂载点
+-a：依照配置文件[/etc/fstab]（../Text/index.html#fstab）的数据将所有未挂载的磁盘都挂载上来
+-l：单纯的输入mount会显示目前挂载的信息，加上-l可增列Label名称！
+-n：在默认情况下，系统会将实际挂载情况实时写入/etc/mtab中，以利其他程序的运行
+-o：后面可以接一些挂载时额外加上的参数！比如账号，密码，读写权限等
+async,sync
+atime,noatime
+ro,rw
+auto,noauto
+dev,nodev
+suid,nosuid
+exec,noexec
+user,nouser
+defaults
+remount
+
+哪些类型的filesystem 才需要进行上述的挂载测试，可参考：/etc/filesystems：系统指定的测试
+挂载文件系统类型优先顺序 /proc/filesystems：Linux系统已经载入的文件系统类型
+
+Linux支持的文件系统驱动程序写在如下目录中
+/lib/module/中（uname -r） /kernel/fs/
+
+挂载xfs/ext4/vfat  等文件系统
+blkid  查看uuid
+mount  挂载文件系统
+
+通过 mount -o remount,rw,auto /    （重新挂载根目录  ？？？）
+
+在不能使用symbolic link 时可以通过mount来实现
+mount --bind /var /data/var   将/var目录暂挂到/data/var
+
+umonut（将设备文件卸载）
+umount [-fn] 设备文件名或挂载点
+-f：强制卸载，可用在类似网络文件系统（NFS）无法读取到的情况下
+-l：立刻卸载文件系统，比-f还强
+-n：不更新/etc/mtab 情况下卸载
+
+磁盘/文件系统参数修订
+*mknod
+通过major与minor数值来替代设备
+
+mknod 设备文件名 [bcp] [Major] [Minor]
+选项与参数：
+设备种类：
+b：设置设备名称成为一个周边储存设备文件，例如磁盘等
+c：设置设备名称成为一个周边输入设备文件，例如鼠标/键盘等
+p：设置设备名称成为一个FIFO文件
+Major：主要设备代码
+Minor：次要设备代码
+
+
+xfs_admin  修改XFS文件系统的UUID与Label name
+xfs_admin [-ln] [-L label] [-U uuid] 设备文件名
+选项与参数：
+-l：列出这个设备的label name
+-u：列出这个设备的UUID
+-L：设置这个设备的Label name
+-U：设置这个设备的UUID
+
+uuidgen  可以产生新的uuid
+
+
+*tune2fs 修改ext4的label name 与 UUID
+tune2fs [-l] [-L label] [-U uuid] 设备文件名
+选项与参数
+-l：类似dumpe2fs -h的功能  ~ 将superblock内的数据读出来
+-L：修改LABEL name
+-U：修改UUID
+
+设置开机挂载
+开机挂载  /etc/fstab  及 /etc/mtab
+开机挂载的一些限制：
+*根目录/是必须挂载的，而且一定要先于其他mount point被挂载进来
+*其它mount point必须为已创建的目录，可任意指定，但一定要遵守必须的系统目录架构原则（FHS）
+*所有mount point在同一时间之内，只能挂载一次
+*所有partition在同一时间之内，只能挂载一次
+*如若进行卸载，您必须先将工作目录移到mount point（及其子目录）之外
+
+其实/etc/fstab （filesystem table）就是将我们利用mount指令进行挂载时，将所有的选项与参数写入
+到这个文件中就是了。除此之外，/etc/fstab还加入了dump这个备份用指令的支持！与开机时是否进行文件
+系统检验fsck等指令有关。这个文件的内容共有六个字段，这六个字段非常的重要！
+-------------------------------------------------------------
+[设备/UUID等] [挂载点] [文件系统] [文件系统参数] [dump] [fsck]
+-------------------------------------------------------------
+*第一栏：磁盘设备文件名/UUID/LABEL name
+这个字段可以填写的数据主要有三个项目：
+*文件系统或磁盘的设备文件名，如/dev/vda2等
+*文件系统的UUID名称，如UUID=xxx
+*文件系统的LABEL名称，例如LABEL=xxx
+
+（LVM的文件名在你的系统中也算是独一无二的）
+可以使用blkid或xfs_admin来查询UUID
+
+*第二栏：挂载点（mount point）
+就是挂载点，挂载点一定是目录
+
+*第三栏：磁盘分区的文件系统
+在手动挂载时可以让系统自动测试挂载，但在这个文件当中必须要手动写入文件系统才行！包括xfs，ext4，vfat，reiserfs，nfs等等
+
+*第四栏：文件系统参数
+记不得我们在mount这个指令中谈到很多特殊的文件系统参数？还有我们使用过的“-ocodepage=950”？这些特殊的参数就是写入在这个字段啦！
+虽然之前在mount已经提过一次，这里我们利用表格的方式再汇整一下。
+async/sync非同步/同步	设置磁盘是否以非同步方式运行！默认为async（性能较佳）
+auto/noauto自动/非自动	当下达mount -a时，此文件系统是否会被主动测试挂载。默认为auto 
+rw/ro可读写/只读	让该分区以可读写或者只读的形态挂载上来，如果你想分享的数据是不给使用者随意变更的，这里也能够设置为只读。则不论在此文件系统的文件是否设置w权限，都无法写入哦
+exec/noexec可执行/不可执行	限制在此文件系统内是否可以进行“执行”的工作？如果是纯粹用来储存数据的目录，那么可以设置为noexec会比较安全。不过，这个参数也不能随便使用，因为你不知道该目录下是否默认会有可执行文件。举例来说，如果你将noexec设置在/var，当某些软件将一些执行文件放置于/var下时，那就会产生很大的问题！因此，建议这个noexec最多仅设置于你自订或分享的一般数据目录
+user/nouser允许/不允许使用者挂载	是否允许使用者使用mount指令来挂载呢？一般而言，我们当然不希望一般身份的user能使用mount喽，因为太不安全了，因此这里应该要设置为nouser
+suid/nosuid具有/不具有suid权限	该文件系统是否允许SUID的存在？如果不是可执行文件放置目录，也可以设置为nosuid来取消这个功能
+defaults	同时具有rw，suid，dev，exec，auto，nouser，async等参数。基本上，默认情况使用defaults设置即可！
+
+*第五栏：能否被dump备份指令作用
+dump是一个用来做为备份的指令，不过现在有太多的备份方案了，所以这个项目可以不要理会！直接输入0就好了
+
+*第六栏：是否以fsck检验扇区
+早期开机的流程中，会有一段时间去检验本机的文件系统，看看文件系统是否完整（clean）。不过这个方式使用的主要是通过fsck去做的，我们现在用的xfs文件系统就没有办法适用，因为
+xfs会自己进行检验，不需要额外进行这个动作！所以直接填0就好了。
+
+/etc/fstab是开机时的配置文件，不过，实际filesystem的挂载是记录到/etc/mtab与/proc/mounts这两个文件当中的。每次我们在更动filesystem的挂载时，也会同时更动这两个文件。但是，万一发生你在
+/etc/fstab输入的数据错误，导致无法顺利开机成功，而进入单人维护模式当中，那时候的/可是read only的状态，当然你就无法修改/etc/fstab，也无法更新/etc/mtab啰，
+可以利用 mount -n -o remount,rw /
+
+
+特殊设备loop挂载（镜像文件不烧录就挂载使用）
+如果有光盘镜像文件，或者是使用文件作为磁盘的方式时，那就得要使用特别的方法来将他挂载起来，不需要烧录啦！！
+*挂载光盘/DVD镜像文件
+例：mount -o loop /tmp/CentOS.iso /data/centos_dvd
+
+*创建大文件以制作loop设备文件
+
+*创建大型文件
+首先，通过Linux的dd程序，创建空的文件
+dd if=/de/zero of=/srv/loopdev bs=1M count=512
+# if 是input file，输入文字。那个/dev/zero是会一直输出0的设备！
+# of 是output file ，将一堆零写入到后面的文件中
+# bs 是每个block大小，就像文件系统那样的block意义
+# count 则是总共几个bs的意思，所以bs*count 就是这个文件的容量
+
+dd就好像在叠砖块一样，将512块，每块1M的砖块堆叠成为一个大文件（/srv/loopdev），最终就会出现一个512MB的文件。
+
+*大型文件的格式化
+默认xfs不能够格式化文件的，所以要格式化文件得要加入特别的参数才行
+mkfs.xfs -f /srv/loopdev
+blkid /drv/loopdev
+
+*挂载
+通过mount -o loop来进行
+mount -o loop UUID="********" /mnt
+df /mnt
+通过这个简单的方法，感觉上就可以在原本的分区在不更动原有的环境下制作出你想要的分区就是了！
+在Linux上使用xen这个软件，他就可以配合这种loop device的文件类型来进行根目录的挂载。
+
+
+
+
