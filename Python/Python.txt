@@ -585,3 +585,29 @@ Python支持格式化字符串的输出。与C中sprintf函数一样的语法
 m.n.              m是显示的最小总宽度，n是小数点后的位数(如果可用的话)
 
 Python2.6开始，新增了一种格式化字符串的函数str.format()，它增强了字符串格式化的功能
+
+Python三引号(triple quotes)
+用于在python中跨多行进行字符串操作
+
+Unicode字符串
+u'Hello World !'
+定义时在Unicode字符串前加上一个u，加入特殊字符，可以使用Python的Unicode-Escape编码，例：'\u0020'
+
+Python的字符串内建函数
+方法                                    描述
+string.capitalize()                     把字符串的第一个字符大写
+string.center(width)                    返回一个原字符串居中，并使用空格填充至长度width的新字符串
+string.count(str,beg=0,end=len(string)) 返回str在string里面出现的次数，如果beg或者end指定则返回指定范围内str出现的次数
+string.decode(encoding='UTF-8',errors='strict') 以encoding指定的编码格式解码string，如果出错默认报一个ValueError的异常，除非errors指定的是'ignore'或者'replace'
+string.encode(encoding='UTF-8',errors='strict') 以encoding指定的编码格式编码string，如果出错默认报一个ValueError的异常，除非errors指定的是'ignore'或者'replace'
+string.endswith(obj,beg=0,end=len(string)) 检查字符串是否以obj结束，如果beg或者end指定则检查指定的范围内是否以obj结束，如果是，返回True，否则返回False
+string.expandtabs(tabsize=8)            把字符串string中的tab符号转为空格，tab符号默认的空格数是8
+string.find(str,beg=0,end=len(string))  检测str是否包含在string中，如果beg和end指定范围，则检查是否包含在指定范围内，如果是返回开始的索引值，否则返回-1
+string.format()                         格式化字符串
+string.index(str,beg=0,end=len(string)) 跟find()方法一样，只不过如果str不在string中会报一个异常
+string.isalnum()                        如果string至少有一个字符并且所有字符都是字母或数字则返回True，否则返回False
+string.isalpha()                        如果string至少有一个字符并且所有字符都是字母则返回True，否则返回False
+string.isdecimal()                      如果string只包含十进制数字则返回True否者返回False
+
+
+
