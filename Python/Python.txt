@@ -615,5 +615,8 @@ string.isspace()                        如果string中只包含空格，则返回True，否则
 string.istitle()                        如果string是标题化的(见title())则返回True，否则返回False
 string.isupper()                        如果 string 中包含至少一个区分大小写的字符，并且所有这些(区分大小写的)字符都是大写，则返回 True，否则返回 False
 string.join(seq)                        以string作为分隔符，将seq中的所有元素合并为一个新的字符串
-
+string.ljust(width)                     返回一个原字符串左对齐，并使用空格 填充至长度width的新字符串
+string.lower()                          转换string中所有大写字符为小写
+string.lstrip()                         截掉string左边的空格
+string.maketrans(intab[, outtab])       maketrans()方法用于创建字符映射的转换表，对于接受两个参数的最简单的调用方式，第一个参数是字符串，表示需要转换的字符，第二个参数也是字符串表示转换的目标
 
